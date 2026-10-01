@@ -6,6 +6,7 @@ import { facebookApi } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import ScheduleFbPost from "../components/ScheduleFbPost";
+import FbPostTable from "../components/FbPostTable";
 
 const ERROR_MESSAGES = {
   denied: "Facebook login was cancelled.",
@@ -33,6 +34,7 @@ const Facebook = () => {
   const [formToggled, setFormToggled] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [removingId, setRemovingId] = useState(null);
+  const [postsRefreshKey, setPostsRefreshKey] = useState(0);
   const [searchParams, setSearchParams] = useSearchParams();
   const { currentUser, fbAccounts, refreshFbAccounts } = useAuth();
   const { showToast } = useToast();
@@ -231,7 +233,8 @@ const Facebook = () => {
       )}
     </div>
 
-    <ScheduleFbPost/>
+    <ScheduleFbPost onSaved={() => setPostsRefreshKey((key) => key + 1)} />
+    <FbPostTable refreshKey={postsRefreshKey} />
     </>
   );
 };

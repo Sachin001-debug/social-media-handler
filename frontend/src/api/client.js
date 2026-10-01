@@ -3,11 +3,12 @@ const API_URL = (
 ).replace(/\/$/, "");
 
 const request = async (path, { method = "GET", body } = {}) => {
+  const isFormData = body instanceof FormData;
   const response = await fetch(`${API_URL}${path}`, {
     method,
     credentials: "include",
-    headers: body ? { "Content-Type": "application/json" } : undefined,
-    body: body ? JSON.stringify(body) : undefined,
+    headers: body && !isFormData ? { "Content-Type": "application/json" } : undefined,
+    body: body ? (isFormData ? body : JSON.stringify(body)) : undefined,
   });
 
   let data = null;
@@ -41,6 +42,18 @@ export const facebookApi = {
   accounts: () => request("/api/facebook/accounts"),
 
   disconnect: (id) => request(`/api/facebook/accounts/${id}`, { method: "DELETE" }),
+
+  scheduledPosts: () => request("/api/facebook/scheduled-posts"),
+
+  saveScheduledPost: (payload) => {
+    const body = new FormData();
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        body.append(key, value);
+      }
+    });
+    return request("/api/facebook/scheduled-posts", { method: "POST", body });
+  },
 };
 
 export { API_URL };

@@ -1,8 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { facebookApi } from '../api/client'
 
-// Uses Tailwind classes. Replace `onSubmit` with your post/schedule API call.
-
 const MEDIA_TYPES = [
   { id: 'none', label: 'Text only', accept: '', maxMB: 0 },
   { id: 'image', label: 'Photo', accept: 'image/*', maxMB: 10 },
@@ -16,9 +14,7 @@ const toLocalInput = (d) =>
   `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 const formatSize = (b) => (b > 1048576 ? `${(b / 1048576).toFixed(1)} MB` : `${Math.ceil(b / 1024)} KB`)
 
-const ScheduleFbPost = ({
-  onSubmit = (payload) => console.log('Post payload:', payload),
-}) => {
+const ScheduleFbPost = ({ onSaved }) => {
   const fileInput = useRef(null)
 
   // connected accounts
@@ -38,6 +34,8 @@ const ScheduleFbPost = ({
   const [when, setWhen] = useState('')
   const [errors, setErrors] = useState({})
   const [done, setDone] = useState('')
+  const [submitError, setSubmitError] = useState('')
+  const [saving, setSaving] = useState(false)
 
   // Facebook accepts scheduled posts 10 minutes to 30 days ahead
   const [minWhen, maxWhen] = useMemo(() => {
@@ -126,25 +124,37 @@ const ScheduleFbPost = ({
     setErrors({})
   }
 
-  const handleSubmit = (ev) => {
+  const handleSubmit = async (ev) => {
     ev.preventDefault()
+    setDone('')
+    setSubmitError('')
     if (!validate()) return
+
     const payload = {
       pageId,
       message: message.trim(),
       link: link || undefined,
       mediaType,
       file,
+      mode,
       scheduledAt: mode === 'schedule' ? new Date(when).toISOString() : null,
     }
-    onSubmit(payload)
-    setDone(
-      mode === 'schedule'
-        ? `Scheduled for ${new Date(when).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}.`
-        : 'Published.'
-    )
-    resetForm()
-    setTimeout(() => setDone(''), 5000)
+
+    setSaving(true)
+    try {
+      await facebookApi.saveScheduledPost(payload)
+      onSaved?.()
+      setDone(
+        mode === 'schedule'
+          ? `Post scheduled for ${new Date(when).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}.`
+          : 'Post saved.'
+      )
+      resetForm()
+    } catch (error) {
+      setSubmitError(error.message || 'Could not save the post.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const selectedAccount = accounts.find((a) => a.id === pageId)
@@ -165,6 +175,11 @@ const ScheduleFbPost = ({
         {done && (
           <div role="status" className="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
             {done}
+          </div>
+        )}
+        {submitError && (
+          <div role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+            {submitError}
           </div>
         )}
 
@@ -371,10 +386,10 @@ const ScheduleFbPost = ({
           </button>
           <button
             type="submit"
-            disabled={loadingAccounts || accounts.length === 0}
+            disabled={loadingAccounts || accounts.length === 0 || saving}
             className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500/40 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {mode === 'schedule' ? 'Schedule post' : 'Publish now'}
+            {saving ? 'Saving…' : mode === 'schedule' ? 'Schedule post' : 'Save post'}
           </button>
         </div>
       </form>

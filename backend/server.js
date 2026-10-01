@@ -6,6 +6,7 @@ import db from "./models/index.js";
 import { config as dbConfig } from "./config/sequelize.js";
 import authRoutes from "./routes/authRoutes.js";
 import fbRoutes from "./routes/fbRoutes.js";
+import fbScheduledPostRoutes from "./routes/fbScheduledPostRoutes.js";
 
 dotenv.config();
 
@@ -43,6 +44,7 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api", authRoutes);
 app.use("/api", fbRoutes);
+app.use("/api/facebook", fbScheduledPostRoutes);
 
 // FB_REDIRECT_URI is configured as /auth/facebook/callback, so alias it to the
 // same router instead of forcing a mismatch between env and routes
