@@ -13,7 +13,7 @@ export const saveFbScheduledPost = async ({
   scheduledAt = null,
 }) => {
   const account = await db.FbAccount.findOne({
-    where: { id: fbAccountId, userId },
+    where: { id: fbAccountId, userId, isPage: true },
   });
   if (!account) {
     const error = new Error("Facebook account not found");
@@ -33,7 +33,7 @@ export const saveFbScheduledPost = async ({
     throw error;
   }
 
-  if (!["none", "image", "video", "audio"].includes(mediaType)) {
+  if (!["none", "image", "video"].includes(mediaType)) {
     const error = new Error("Invalid media type");
     error.status = 400;
     throw error;

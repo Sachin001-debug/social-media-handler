@@ -70,7 +70,7 @@ const FbPostTable = ({ refreshKey = 0 }) => {
       <div className="border-b border-slate-200 px-5 py-4">
         <h2 className="text-lg font-semibold text-slate-900">Your Facebook posts</h2>
         <p className="mt-1 text-sm text-slate-500">
-          Posts saved for your connected Facebook accounts.
+          Posts saved for your connected Facebook Pages.
         </p>
       </div>
 
@@ -97,7 +97,7 @@ const FbPostTable = ({ refreshKey = 0 }) => {
             <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
               <tr>
                 <th scope="col" className="px-5 py-3 font-medium">Post</th>
-                <th scope="col" className="px-5 py-3 font-medium">Facebook account</th>
+                <th scope="col" className="px-5 py-3 font-medium">Facebook Page</th>
                 <th scope="col" className="px-5 py-3 font-medium">When</th>
                 <th scope="col" className="px-5 py-3 font-medium">Status</th>
                 <th scope="col" className="px-5 py-3 font-medium">Media</th>
@@ -125,7 +125,7 @@ const FbPostTable = ({ refreshKey = 0 }) => {
                     )}
                   </td>
                   <td className="px-5 py-4 text-slate-700">
-                    <p className="font-medium">{post.fbAccount?.name || "Disconnected account"}</p>
+                    <p className="font-medium">{post.fbAccount?.name || "Disconnected Page"}</p>
                     {post.fbAccount?.fbUserId && (
                       <p className="mt-0.5 text-xs text-slate-500">
                         Facebook ID {post.fbAccount.fbUserId}

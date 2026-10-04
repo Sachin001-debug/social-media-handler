@@ -20,6 +20,12 @@ export default (sequelize) => {
         unique: true,
         field: "fb_user_id",
       },
+      isPage: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+        field: "is_page",
+      },
       name: {
         type: DataTypes.STRING(255),
         allowNull: true,

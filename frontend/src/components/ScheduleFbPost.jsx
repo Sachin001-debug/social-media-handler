@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { facebookApi } from '../api/client'
+import FacebookPageAvatar from './FacebookPageAvatar'
 
 const MEDIA_TYPES = [
   { id: 'none', label: 'Text only', accept: '', maxMB: 0 },
   { id: 'image', label: 'Photo', accept: 'image/*', maxMB: 10 },
   { id: 'video', label: 'Video', accept: 'video/*', maxMB: 1024 },
-  { id: 'audio', label: 'Audio', accept: 'audio/*', maxMB: 100 },
 ]
 
 const MAX_CHARS = 5000
@@ -43,7 +43,7 @@ const ScheduleFbPost = ({ onSaved }) => {
     return [toLocalInput(new Date(now + 10 * 60000)), toLocalInput(new Date(now + 30 * 86400000))]
   }, [])
 
-  // Load the user's saved Facebook accounts
+  // Load the user's Facebook Pages
   useEffect(() => {
     let cancelled = false
 
@@ -169,7 +169,7 @@ const ScheduleFbPost = ({ onSaved }) => {
       <form onSubmit={handleSubmit} noValidate className="space-y-6 rounded-xl border border-slate-200 bg-white p-6">
         <div>
           <h2 className="text-xl font-semibold text-slate-900">Schedule a post</h2>
-          <p className="mt-1 text-sm text-slate-500">Write it, add media, and choose when it goes live.</p>
+          <p className="mt-1 text-sm text-slate-500">Write it, add media, and choose which Page and when it goes live.</p>
         </div>
 
         {done && (
@@ -183,18 +183,11 @@ const ScheduleFbPost = ({ onSaved }) => {
           </div>
         )}
 
-        {/* Page select, filled from saved accounts */}
+        {/* Page select, filled from the connected Facebook Pages */}
         <div>
           <label htmlFor="page" className={label}>Page</label>
           <div className="flex items-center gap-3">
-            {selectedAccount?.picture && (
-              <img
-                src={selectedAccount.picture}
-                alt=""
-                aria-hidden="true"
-                className="h-10 w-10 shrink-0 rounded-full object-cover"
-              />
-            )}
+            {selectedAccount && <FacebookPageAvatar account={selectedAccount} className="h-10 w-10" />}
             <select
               id="page"
               value={pageId}
@@ -202,7 +195,7 @@ const ScheduleFbPost = ({ onSaved }) => {
               disabled={loadingAccounts || accounts.length === 0}
               className={input}
             >
-              {loadingAccounts && <option value="">Loading accounts…</option>}
+              {loadingAccounts && <option value="">Loading Pages…</option>}
               {!loadingAccounts && accounts.length === 0 && <option value="">No connected Pages</option>}
               {accounts.map((a) => (
                 <option key={a.id} value={a.id}>{a.name}</option>
@@ -213,7 +206,7 @@ const ScheduleFbPost = ({ onSaved }) => {
           {accountsError && <p className="mt-1.5 text-xs text-red-600">{accountsError}</p>}
           {!loadingAccounts && !accountsError && accounts.length === 0 && (
             <p className="mt-1.5 text-xs text-slate-500">
-              No Facebook account is connected yet.{' '}
+              No Facebook Pages are connected yet.{' '}
               <a href={facebookApi.loginUrl()} className="font-medium text-blue-600 hover:underline">
                 Connect Facebook
               </a>
@@ -399,17 +392,7 @@ const ScheduleFbPost = ({ onSaved }) => {
         <p className="mb-3 text-sm font-medium text-slate-700">Preview</p>
         <div className="overflow-hidden rounded-lg border border-slate-200">
           <div className="flex items-center gap-3 p-3">
-            {selectedAccount?.picture ? (
-              <img
-                src={selectedAccount.picture}
-                alt={`${pageName} profile`}
-                className="h-10 w-10 rounded-full object-cover"
-              />
-            ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white">
-                {pageName.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <FacebookPageAvatar account={selectedAccount} className="h-10 w-10" />
             <div>
               <p className="text-sm font-semibold text-slate-900">{pageName}</p>
               <p className="text-xs text-slate-500">

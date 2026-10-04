@@ -7,6 +7,8 @@ import { config as dbConfig } from "./config/sequelize.js";
 import authRoutes from "./routes/authRoutes.js";
 import fbRoutes from "./routes/fbRoutes.js";
 import fbScheduledPostRoutes from "./routes/fbScheduledPostRoutes.js";
+import fbPostRoute from "./routes/fbPostRoute.js";
+import { startFbPostScheduler } from "./services/fbPostService.js";
 
 dotenv.config();
 
@@ -45,6 +47,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api", authRoutes);
 app.use("/api", fbRoutes);
 app.use("/api/facebook", fbScheduledPostRoutes);
+app.use("/api/facebook", fbPostRoute);
 
 // FB_REDIRECT_URI is configured as /auth/facebook/callback, so alias it to the
 // same router instead of forcing a mismatch between env and routes
@@ -65,6 +68,7 @@ app.use((err, req, res, next) => {
 const start = async () => {
   try {
     await db.sequelize.authenticate();
+    startFbPostScheduler();
   } catch (error) {
     console.error(
       `MySQL connection failed (${dbConfig.host}:${dbConfig.port}/${dbConfig.database}): ${error.message}`

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Instagram, Facebook } from './SocialIcons';
 import { useAuth } from '../context/AuthContext';
+import Logo from '../assets/Logo.jpg'
 
 export default function Sidebar({ mobileOpen, onCloseMobile }) {
   const { currentUser, logout } = useAuth();
@@ -52,9 +53,7 @@ export default function Sidebar({ mobileOpen, onCloseMobile }) {
       {/* Brand Header */}
       <div className="h-16 px-6 flex items-center justify-between border-b border-[#E5E7EB]">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#172033] text-white flex items-center justify-center font-bold shadow-subtle">
-            <Share2 className="w-4 h-4 text-white" />
-          </div>
+             <img src={Logo} className='h-10 w-10'/>
           <div className="flex flex-col">
             <span className="font-bold text-sm tracking-tight text-[#111827]">Socially</span>
             <span className="text-[10px] text-[#6B7280] uppercase tracking-wider font-semibold">Workspace</span>

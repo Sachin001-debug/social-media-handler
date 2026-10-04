@@ -6,6 +6,7 @@ import {
 } from "../services/userService.js";
 import {
   deleteFbAccount,
+  getFbPagePicture,
   listFbAccounts,
 } from "../services/fbAccountService.js";
 
@@ -135,7 +136,9 @@ export const me = async (req, res) => {
     res.json({ user: toPublicUser(user), fbAccounts });
   } catch (error) {
     console.error("Session error:", error.message);
-    res.status(500).json({ message: "Could not load session" });
+    res.status(error.status || 500).json({
+      message: error.status ? error.message : "Could not load session",
+    });
   }
 };
 
@@ -149,8 +152,34 @@ export const logout = (req, res) => {
 
 // List connected Facebook accounts
 export const getFbAccounts = async (req, res) => {
-  const accounts = await listFbAccounts(req.session.userId);
-  res.json({ fbAccounts: accounts });
+  try {
+    const accounts = await listFbAccounts(req.session.userId);
+    return res.json({ fbAccounts: accounts });
+  } catch (error) {
+    console.error("Facebook accounts error:", error.message);
+    return res.status(error.status || 500).json({
+      message: error.status ? error.message : "Could not load Facebook Pages",
+    });
+  }
+};
+
+export const getFbAccountPicture = async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isSafeInteger(id) || id < 1) {
+    return res.status(400).json({ message: "Invalid Facebook Page ID" });
+  }
+
+  try {
+    const { image, contentType } = await getFbPagePicture(req.session.userId, id);
+    res.set("Content-Type", contentType);
+    res.set("Cache-Control", "private, max-age=900");
+    return res.send(image);
+  } catch (error) {
+    console.error("Facebook Page picture error:", error.message);
+    return res.status(error.status || 502).json({
+      message: error.status ? error.message : "Could not load Facebook Page image",
+    });
+  }
 };
 
 // Disconnect one Facebook account

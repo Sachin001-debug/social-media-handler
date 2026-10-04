@@ -56,7 +56,7 @@ export const getFacebookLoginUrl = () => {
     redirect_uri: FB_REDIRECT_URI,
     state,
     response_type: "code",
-    scope: "public_profile",
+    scope: "public_profile,pages_show_list,pages_read_engagement,pages_manage_posts",
   });
 
   return {
@@ -84,20 +84,37 @@ export const getFacebookUser = async (code) => {
     throw new Error("Facebook did not return an access token");
   }
 
+  const extendedToken = await graph("/oauth/access_token", {
+    grant_type: "fb_exchange_token",
+    client_id: FB_APP_ID,
+    client_secret: FB_APP_SECRET,
+    fb_exchange_token: token.access_token,
+  });
+  if (!extendedToken.access_token) {
+    throw new Error("Facebook did not return a long-lived access token");
+  }
+
   const user = await graph("/me", {
     fields: "id,name,email,picture",
-    access_token: token.access_token,
+    access_token: extendedToken.access_token,
   });
 
   if (!user.id) {
     throw new Error("Facebook did not return a user id");
   }
 
+  const pageData = await graph("/me/accounts", {
+    fields: "id,name,access_token,picture",
+    limit: "100",
+    access_token: extendedToken.access_token,
+  });
+
   return {
     id: user.id,
     name: user.name,
     email: user.email || null,
     picture: user?.picture?.data?.url || null,
-    accessToken: token.access_token,
+    accessToken: extendedToken.access_token,
+    pages: Array.isArray(pageData.data) ? pageData.data : [],
   };
 };

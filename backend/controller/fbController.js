@@ -71,29 +71,36 @@ export const facebookCallback = async (req, res) => {
     // Get Facebook user
     const user = await getFacebookUser(code);
 
-    // A Facebook account may only be linked to one Socially user
-    const existing = await findFbAccountByFbUserId(user.id);
-
-    if (existing && existing.user_id !== req.session.userId) {
-      return res.redirect(
-        redirectToFrontend("facebook", { error: "account_in_use" })
-      );
+    if (user.pages.length === 0) {
+      return res.redirect(redirectToFrontend("facebook", { error: "no_pages" }));
     }
 
-    await upsertFbAccount({
-      userId: req.session.userId,
-      fbUserId: user.id,
-      name: user.name,
-      email: user.email,
-      picture: user.picture,
-      accessToken: user.accessToken,
-    });
+    for (const page of user.pages) {
+      if (!page.id || !page.access_token) {
+        throw new Error("Facebook returned a Page without an id or access token");
+      }
+
+      const existing = await findFbAccountByFbUserId(page.id);
+      if (existing && Number(existing.userId) !== Number(req.session.userId)) {
+        return res.redirect(
+          redirectToFrontend("facebook", { error: "account_in_use" })
+        );
+      }
+
+      await upsertFbAccount({
+        userId: req.session.userId,
+        fbUserId: page.id,
+        name: page.name,
+        picture: page.picture?.data?.url || null,
+        accessToken: page.access_token,
+      });
+    }
 
     res.redirect(
       redirectToFrontend("facebook", {
         connected: "true",
-        fbId: String(user.id),
-        name: user.name || "",
+        fbId: String(user.pages[0].id),
+        name: user.pages[0].name || "",
       })
     );
   } catch (error) {
@@ -115,6 +122,6 @@ export const facebookStatus = async (req, res) => {
     });
   } catch (error) {
     console.error("Facebook status error:", error.message);
-    res.status(500).json({ message: "Could not load Facebook accounts" });
+    res.status(500).json({ message: "Could not load Facebook Pages" });
   }
 };

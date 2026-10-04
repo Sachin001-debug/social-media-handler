@@ -7,12 +7,14 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import ScheduleFbPost from "../components/ScheduleFbPost";
 import FbPostTable from "../components/FbPostTable";
+import FacebookPageAvatar from "../components/FacebookPageAvatar";
 
 const ERROR_MESSAGES = {
   denied: "Facebook login was cancelled.",
   invalid_state: "Login session expired. Please try again.",
   missing_code: "Facebook did not return an authorization code.",
   account_in_use: "That Facebook account is already linked to another user.",
+  no_pages: "No Facebook Pages were found for this account. Add a Page or request access, then connect again.",
   login_failed: "Could not connect to Facebook. Please try again.",
   session_expired: "Your session expired. Please sign in again.",
 };
@@ -89,7 +91,7 @@ const Facebook = () => {
         <div>
           <h1 className="text-xl font-bold text-[#111827]">Facebook</h1>
           <p className="text-sm text-[#6B7280] mt-0.5">
-            Connected accounts for{" "}
+            Connected Pages for{" "}
             <span className="font-semibold text-[#111827]">
               {currentUser?.name}
             </span>
@@ -120,7 +122,7 @@ const Facebook = () => {
                   Connect to Facebook
                 </h3>
                 <p className="text-xs text-gray-500">
-                  You can connect more than one account
+                  You can connect more than one Page
                 </p>
               </div>
             </div>
@@ -166,10 +168,10 @@ const Facebook = () => {
             <FaFacebookF size={20} />
           </div>
           <h2 className="mt-3 text-sm font-semibold text-[#111827]">
-            No Facebook accounts connected
+            No Facebook Pages connected
           </h2>
           <p className="mt-1 text-xs text-[#6B7280]">
-            Connect an account to start scheduling posts.
+            Connect a Page to start scheduling posts.
           </p>
         </div>
       ) : (
@@ -179,17 +181,7 @@ const Facebook = () => {
               key={account.id}
               className="flex items-center gap-3.5 rounded-xl bg-white p-4 ring-1 ring-black/5 shadow-sm"
             >
-              {account.picture ? (
-                <img
-                  src={account.picture}
-                  alt={account.name || "Facebook profile"}
-                  className="h-11 w-11 shrink-0 rounded-full object-cover"
-                />
-              ) : (
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#1877F2] text-white">
-                  <FaFacebookF size={18} />
-                </div>
-              )}
+              <FacebookPageAvatar account={account} className="h-11 w-11" />
 
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">

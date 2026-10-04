@@ -41,6 +41,8 @@ export const facebookApi = {
 
   accounts: () => request("/api/facebook/accounts"),
 
+  pictureUrl: (id) => `${API_URL}/api/facebook/accounts/${encodeURIComponent(id)}/picture`,
+
   disconnect: (id) => request(`/api/facebook/accounts/${id}`, { method: "DELETE" }),
 
   scheduledPosts: () => request("/api/facebook/scheduled-posts"),
