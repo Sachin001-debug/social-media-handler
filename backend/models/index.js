@@ -6,6 +6,7 @@ import sequelize from "../config/sequelize.js";
 import defineUser from "./user.js";
 import defineFbAccount from "./fbAccount.js";
 import defineFbScheduledPost from "./fbSchedulePost.js";
+import defineInstagramAccount from "./Instagramaccount.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -15,6 +16,7 @@ const db = {
   User: defineUser(sequelize),
   FbAccount: defineFbAccount(sequelize),
   FbScheduledPost: defineFbScheduledPost(sequelize),
+  InstagramAccount: defineInstagramAccount(sequelize),
 };
 
 // Wire up associations

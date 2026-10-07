@@ -37,6 +37,11 @@ export default (sequelize) => {
       as: "fbAccounts",
       onDelete: "CASCADE",
     });
+    User.hasMany(models.InstagramAccount, {
+      foreignKey: { name: "userId", field: "user_id" },
+      as: "instagramAccounts",
+      onDelete: "CASCADE",
+    });
   };
 
   return User;

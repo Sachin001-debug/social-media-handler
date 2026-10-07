@@ -58,4 +58,13 @@ export const facebookApi = {
   },
 };
 
+//insta api
+export const instagramApi = {
+  loginUrl: () => `${API_URL}/api/instagram`,
+  accounts: () => request("/api/instagram/accounts"),
+  disconnect: (id) =>
+    request(`/api/instagram/accounts/${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    }),
+};
 export { API_URL };
