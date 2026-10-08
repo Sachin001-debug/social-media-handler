@@ -1,4 +1,5 @@
 import express from "express";
+import path from "path";
 import cors from "cors";
 import dotenv from "dotenv";
 import session from "express-session";
@@ -10,6 +11,7 @@ import fbScheduledPostRoutes from "./routes/fbScheduledPostRoutes.js";
 import fbPostRoute from "./routes/fbPostRoute.js";
 import { startFbPostScheduler } from "./services/fbPostService.js";
 import instaRoutes from "./routes/instagramRoutes.js";
+import instaScheduledPostRoutes from "./routes/instaScheduledPostRoutes.js";
 
 dotenv.config();
 
@@ -41,6 +43,9 @@ app.use(
 );
 
 // Routes
+// Media files: Instagram downloads these from PUBLIC_API_URL/uploads/...
+app.use("/uploads", express.static(path.resolve("uploads")));
+
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
@@ -50,6 +55,7 @@ app.use("/api", fbRoutes);
 app.use("/api/facebook", fbScheduledPostRoutes);
 app.use("/api/facebook", fbPostRoute);
 app.use("/api", instaRoutes )
+app.use("/api/instagram", instaScheduledPostRoutes);
 // FB_REDIRECT_URI is configured as /auth/facebook/callback, so alias it to the
 // same router instead of forcing a mismatch between env and routes
 app.use("/auth", fbRoutes);

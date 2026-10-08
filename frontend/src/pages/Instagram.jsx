@@ -5,7 +5,10 @@ import { useSearchParams } from "react-router-dom";
 import { instagramApi } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
+import ScheduleInstaPost from "../components/ScheduleInstaPost";
+import InstaPosttable from "../components/InstaPosttable";
 
+//err msgs
 const ERROR_MESSAGES = {
   denied: "Instagram login was cancelled.",
   invalid_state: "Login session expired. Please try again.",
@@ -39,6 +42,7 @@ const Instagram = () => {
   const [removingId, setRemovingId] = useState(null);
   const [accounts, setAccounts] = useState([]);
   const handledOAuthResult = useRef(false);
+  const [postsRefreshKey, setPostsRefreshKey] = useState(0);
   const [searchParams, setSearchParams] = useSearchParams();
   const { currentUser } = useAuth();
   const { showToast } = useToast();
@@ -96,6 +100,8 @@ const Instagram = () => {
     window.location.href = instagramApi.loginUrl();
   };
 
+
+  //discout the insta
   const handleDisconnect = async (id) => {
     setRemovingId(id);
 
@@ -111,6 +117,7 @@ const Instagram = () => {
   };
 
   return (
+    <>
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
@@ -266,6 +273,11 @@ const Instagram = () => {
         </ul>
       )}
     </div>
+
+
+    <ScheduleInstaPost onSaved={() => setPostsRefreshKey((key) => key + 1)} />
+    <InstaPosttable refreshKey={postsRefreshKey} />
+    </>
   );
 };
 

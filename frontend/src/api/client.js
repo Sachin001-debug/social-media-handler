@@ -66,5 +66,21 @@ export const instagramApi = {
     request(`/api/instagram/accounts/${encodeURIComponent(id)}`, {
       method: "DELETE",
     }),
+    scheduledPosts: ()=> request('/api/instagram/scheduled-posts'),
+
+     saveScheduledPost: (payload) => {
+    const body = new FormData();
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        body.append(key, value);
+      }
+    });
+    return request("/api/instagram/scheduled-posts", { method: "POST", body });
+  },
+
+  publishPost: (id) =>
+    request(`/api/instagram/scheduled-posts/${encodeURIComponent(id)}/publish`, {
+      method: "POST",
+    }),
 };
 export { API_URL };

@@ -150,7 +150,7 @@ const ScheduleInstaPost = ({ onSaved }) => {
     if (!validate()) return
 
     const payload = {
-      accountId,
+      instagramAccountId: accountId,
       caption: caption.trim(),
       mediaType,
       file,
@@ -160,19 +160,19 @@ const ScheduleInstaPost = ({ onSaved }) => {
 
     setSaving(true)
     try {
-      // Frontend only for now: uses the API call once it exists, otherwise just logs the payload
-      if (typeof instagramApi.saveScheduledPost === 'function') {
-        await instagramApi.saveScheduledPost(payload)
-      } else {
-        console.log('[ScheduleInstaPost] payload (no backend yet):', payload)
-        await new Promise((resolve) => setTimeout(resolve, 600))
+      const saved = await instagramApi.saveScheduledPost(payload)
+
+      // Post now: publish right away. Scheduling is saved only (publishing later).
+      if (mode === 'now') {
+        if (!saved?.post?.id) throw new Error('The post could not be saved.')
+        await instagramApi.publishPost(saved.post.id)
       }
 
       onSaved?.()
       setDone(
         mode === 'schedule'
           ? `Post scheduled for ${new Date(when).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}.`
-          : 'Post saved.'
+          : 'Post published to Instagram.'
       )
       resetForm()
     } catch (error) {

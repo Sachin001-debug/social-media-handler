@@ -88,7 +88,7 @@ const publishPost = async (post, account) => {
   const file = {
     path: post.mediaPath,
     name: post.mediaOriginalName || "upload",
-    mimeType: post.mediaMimeType,
+    mimeType: post.mediaMimeType
   };
 
   if (post.mediaType === "image") {
