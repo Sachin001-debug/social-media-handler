@@ -13,9 +13,11 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Instagram from './pages/Instagram';
 import Facebook from './pages/Facebook';
+import Messenger from './pages/Messenger';
 import Whatsapp from './pages/Whatsapp';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import Orders from './pages/Orders';
 
 // Protected Route Guard
 function ProtectedRoute({ children }) {
@@ -90,6 +92,8 @@ export default function App() {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/instagram" element={<Instagram />} />
                 <Route path="/facebook" element={<Facebook />} />
+                <Route path="/messenger" element={<Messenger />} />
+                  <Route path="/orders" element={<Orders />} />
                 <Route path="/whatsapp" element={<Whatsapp />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/settings" element={<Settings />} />

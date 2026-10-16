@@ -2,6 +2,7 @@ import {
   getFacebookLoginUrl,
   getFacebookUser,
   getConfig,
+  subscribePageToMessaging,
 } from "../services/fbServices.js";
 import {
   findFbAccountByFbUserId,
@@ -94,6 +95,9 @@ export const facebookCallback = async (req, res) => {
         picture: page.picture?.data?.url || null,
         accessToken: page.access_token,
       });
+
+      // Best-effort: make sure Messenger webhooks are delivered for this Page
+      await subscribePageToMessaging(page.id, page.access_token);
     }
 
     res.redirect(

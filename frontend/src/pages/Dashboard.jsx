@@ -105,8 +105,8 @@ const Dashboard = () => {
         </div>
 
         <p className="relative mt-5 max-w-xl text-sm leading-relaxed text-slate-500">
-          Manage your user account(s) from here. Social media handling has
-          never been easier.
+          Manage your user account(s) from here. Social media handling has never
+          been easier.
         </p>
       </div>
 
@@ -116,7 +116,9 @@ const Dashboard = () => {
           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-sky-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-500">Facebook Pages</p>
+              <p className="text-sm font-medium text-slate-500">
+                Facebook Pages
+              </p>
               <p className="mt-2 text-4xl font-bold tracking-tight text-slate-900">
                 {fbAccounts.length}
               </p>
@@ -125,14 +127,41 @@ const Dashboard = () => {
               <FaFacebookF className="h-6 w-6" />
             </span>
           </div>
-          <p className="mt-4 text-sm text-slate-500">Connected Facebook Pages</p>
+          <p className="mt-4 text-sm text-slate-500">
+            Connected Facebook Pages
+          </p>
         </div>
 
+        {/**Post counts for fb */}
+        <div className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300  hover:border-blue-200 hover:shadow-xl hover:shadow-blue-500/10">
+          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-sky-400 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">
+                Facebook Posts
+              </p>
+              <p className="mt-2 text-4xl font-bold tracking-tight text-slate-900">
+                {fbAccounts.length}
+              </p>
+            </div>
+            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-[#1877F2] ring-1 ring-inset ring-blue-100 transition-transform duration-300 group-hover:scale-110">
+              <FaFacebookF className="h-6 w-6" />
+            </span>
+          </div>
+          <p className="mt-4 text-sm text-slate-500">
+            Total facebook post(s) done.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300  hover:border-pink-200 hover:shadow-xl hover:shadow-pink-500/10">
           <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400 via-pink-500 to-purple-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm font-medium text-slate-500">Instagram Accounts</p>
+              <p className="text-sm font-medium text-slate-500">
+                Instagram Accounts
+              </p>
               <p className="mt-2 text-4xl font-bold tracking-tight text-slate-900">
                 {instaAccounts.length}
               </p>
@@ -141,10 +170,31 @@ const Dashboard = () => {
               <FaInstagram className="h-6 w-6" />
             </span>
           </div>
-          <p className="mt-4 text-sm text-slate-500">Connected Instagram Accounts</p>
+          <p className="mt-4 text-sm text-slate-500">
+            Connected Instagram Accounts
+          </p>
+        </div>
+
+        <div className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-all duration-300  hover:border-pink-200 hover:shadow-xl hover:shadow-pink-500/10">
+          <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400 via-pink-500 to-purple-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">
+                Instagram Posts
+              </p>
+              <p className="mt-2 text-4xl font-bold tracking-tight text-slate-900">
+                {instaAccounts.length}
+              </p>
+            </div>
+            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 via-pink-500 to-purple-600 text-white shadow-sm transition-transform duration-300 group-hover:scale-110">
+              <FaInstagram className="h-6 w-6" />
+            </span>
+          </div>
+          <p className="mt-4 text-sm text-slate-500">
+            Total instagram post(s) published.
+          </p>
         </div>
       </div>
-
       {/* Facebook List */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50/60 px-6 py-4">
@@ -156,7 +206,8 @@ const Dashboard = () => {
               Connected Facebook Pages
             </h2>
             <p className="text-xs text-slate-500">
-              {fbAccounts.length} page{fbAccounts.length === 1 ? "" : "s"} linked
+              {fbAccounts.length} page{fbAccounts.length === 1 ? "" : "s"}{" "}
+              linked
             </p>
           </div>
         </div>
@@ -195,7 +246,9 @@ const Dashboard = () => {
                         fallbackIcon={<FaFacebookF className="h-4 w-4" />}
                       />
                       <div className="min-w-0">
-                        <p className="truncate font-medium text-slate-900">{name}</p>
+                        <p className="truncate font-medium text-slate-900">
+                          {name}
+                        </p>
                         <p className="truncate text-xs text-slate-500">
                           ID: {page.fb_user_id || page.page_id || page.id}
                         </p>
@@ -266,7 +319,9 @@ const Dashboard = () => {
                         fallbackIcon={<FaInstagram className="h-4 w-4" />}
                       />
                       <div className="min-w-0">
-                        <p className="truncate font-medium text-slate-900">{name}</p>
+                        <p className="truncate font-medium text-slate-900">
+                          {name}
+                        </p>
                         <p className="truncate text-xs text-slate-500">
                           ID: {account.instagram_id || account.id}
                         </p>

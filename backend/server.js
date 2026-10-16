@@ -10,8 +10,12 @@ import fbRoutes from "./routes/fbRoutes.js";
 import fbScheduledPostRoutes from "./routes/fbScheduledPostRoutes.js";
 import fbPostRoute from "./routes/fbPostRoute.js";
 import { startFbPostScheduler } from "./services/fbPostService.js";
+import { registerMessengerWebhook } from "./services/fbServices.js";
 import instaRoutes from "./routes/instagramRoutes.js";
 import instaScheduledPostRoutes from "./routes/instaScheduledPostRoutes.js";
+import fbMessengerRoutes from "./routes/fbMessengerRoutes.js";
+import webhookRoutes from "./routes/webhookRoutes.js"; // NEW
+import orderRoutes from "./routes/orderRoutes.js";
 
 dotenv.config();
 
@@ -43,21 +47,22 @@ app.use(
 );
 
 // Routes
-// Media files: Instagram downloads these from PUBLIC_API_URL/uploads/...
 app.use("/uploads", express.static(path.resolve("uploads")));
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
+app.use("/webhook", webhookRoutes);
+
 app.use("/api", authRoutes);
 app.use("/api", fbRoutes);
 app.use("/api/facebook", fbScheduledPostRoutes);
 app.use("/api/facebook", fbPostRoute);
-app.use("/api", instaRoutes )
+app.use("/api", instaRoutes);
 app.use("/api/instagram", instaScheduledPostRoutes);
-// FB_REDIRECT_URI is configured as /auth/facebook/callback, so alias it to the
-// same router instead of forcing a mismatch between env and routes
+app.use("/api/messenger", fbMessengerRoutes);
+app.use("/api/orders", orderRoutes);
 app.use("/auth", fbRoutes);
 
 // Unknown API route
@@ -75,7 +80,6 @@ app.use((err, req, res, next) => {
 const start = async () => {
   try {
     await db.sequelize.authenticate();
-    startFbPostScheduler();
   } catch (error) {
     console.error(
       `MySQL connection failed (${dbConfig.host}:${dbConfig.port}/${dbConfig.database}): ${error.message}`
@@ -85,6 +89,8 @@ const start = async () => {
 
   app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
+    startFbPostScheduler();
+    void registerMessengerWebhook();
   });
 };
 

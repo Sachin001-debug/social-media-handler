@@ -19,6 +19,8 @@ export default function DashboardLayout() {
         return 'Facebook';
       case '/whatsapp':
         return 'WhatsApp';
+        case '/orders':
+        return 'Orders';
       case '/profile':
         return 'Profile';
       case '/settings':

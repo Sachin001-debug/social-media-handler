@@ -164,6 +164,7 @@ const ScheduleFbPost = ({ onSaved }) => {
   const label = 'mb-1.5 block text-sm font-medium text-slate-700'
   const err = (k) => errors[k] && <p className="mt-1.5 text-xs text-red-600">{errors[k]}</p>
 
+  
   return (
     <div className="mx-auto grid max-w-6xl gap-6 p-6 lg:grid-cols-[minmax(0,1fr)_340px]">
       <form onSubmit={handleSubmit} noValidate className="space-y-6 rounded-xl border border-slate-200 bg-white p-6">

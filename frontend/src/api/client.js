@@ -58,6 +58,47 @@ export const facebookApi = {
   },
 };
 
+export const messengerApi = {
+  conversations: (accountId) =>
+    request(`/api/messenger/conversations?accountId=${encodeURIComponent(accountId)}`),
+
+  messages: (accountId, conversationId) =>
+    request(
+      `/api/messenger/conversations/${encodeURIComponent(
+        conversationId
+      )}/messages?accountId=${encodeURIComponent(accountId)}`
+    ),
+
+  sendMessage: (accountId, conversationId, payload) => {
+    let body = { accountId, ...payload };
+
+    if (payload.file) {
+      body = new FormData();
+      body.append("accountId", String(accountId));
+      Object.entries(payload).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          body.append(key, value);
+        }
+      });
+    }
+
+    return request(
+      `/api/messenger/conversations/${encodeURIComponent(conversationId)}/messages`,
+      { method: "POST", body }
+    );
+  },
+};
+
+export const ordersApi = {
+  list: (accountId) =>
+    request(`/api/orders?accountId=${encodeURIComponent(accountId)}`),
+  updateStatus: (orderId, status) =>
+    request(`/api/orders/${encodeURIComponent(orderId)}/status`, {
+      method: "PATCH",
+      body: { status },
+    }),
+};
+
 //insta api
 export const instagramApi = {
   loginUrl: () => `${API_URL}/api/instagram`,

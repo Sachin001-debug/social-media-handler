@@ -29,6 +29,7 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.4.0",
     "mysql2": "^3.24.5",
+    "qr": "^0.7.2",
     "sequelize": "^6.37.8",
     "sequelize-cli": "^6.6.5"
   },

@@ -8,6 +8,7 @@ import defineFbAccount from "./fbAccount.js";
 import defineFbScheduledPost from "./fbSchedulePost.js";
 import defineInstagramAccount from "./Instagramaccount.js";
 import defineInstagramScheduledPost from "./InstagramSchedulePost.js";
+import defineOrder from "./Orders.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -19,6 +20,7 @@ const db = {
   FbScheduledPost: defineFbScheduledPost(sequelize),
   InstagramAccount: defineInstagramAccount(sequelize),
   InstagramScheduledPost: defineInstagramScheduledPost(sequelize),
+  Order: defineOrder(sequelize),
 };
 
 // Wire up associations

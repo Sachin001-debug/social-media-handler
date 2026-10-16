@@ -8,10 +8,12 @@ import {
   LogOut,
   X,
   Share2,
+  Box,
 } from 'lucide-react';
 import { Instagram, Facebook } from './SocialIcons';
 import { useAuth } from '../context/AuthContext';
 import Logo from '../assets/Logo.jpg'
+import { FaFacebook, FaFacebookMessenger } from 'react-icons/fa';
 
 export default function Sidebar({ mobileOpen, onCloseMobile }) {
   const { currentUser, logout } = useAuth();
@@ -32,7 +34,9 @@ export default function Sidebar({ mobileOpen, onCloseMobile }) {
   const navLinks = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Instagram', path: '/instagram', icon: Instagram },
-    { name: 'Facebook', path: '/facebook', icon: Facebook },
+        { name: 'Facebook', path: '/facebook', icon: Facebook },
+           { name: 'Orders', path: '/orders', icon: Box },
+    { name: 'Messenger', path: '/messenger', icon: FaFacebookMessenger },
     { name: 'WhatsApp', path: '/whatsapp', icon: MessageCircle },
   ];
 
