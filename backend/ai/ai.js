@@ -1,4 +1,5 @@
-import { PRODUCTS, saveOrder } from "../services/OrderServices.js";
+import { getOrderDetails, PRODUCTS, saveOrder } from "../services/OrderServices.js";
+import { createOrderQr } from "../services/esewaSerices.js";
 export { PRODUCTS };
 
 const getConfig = () => ({
@@ -417,9 +418,9 @@ export async function getReply(
 ) {
   const raw = String(text ?? "").trim();
 
-  if (raw.length > 400) return TEAM_FALLBACK;
+  if (raw.length > 400) return { text: TEAM_FALLBACK };
   if (/```|<\/?[a-z]+>|\b(function|const|import)\b.*[{(;=]/i.test(raw))
-    return TEAM_FALLBACK;
+    return { text: TEAM_FALLBACK };
 
   // Order form submitted -> validate locally, never trust the model
   const form = parseOrderForm(raw);
@@ -429,7 +430,7 @@ export async function getReply(
     if (errors.length) {
       const reply = orderErrorReply(errors);
       remember(userId, raw, reply);
-      return reply;
+      return { text: reply };
     }
 
     let facebookProfile = { username: String(userId), image: null };
@@ -453,24 +454,93 @@ export async function getReply(
         fbAccountId,
         fbUsername: facebookProfile?.username || String(userId),
         fbImage: facebookProfile?.image || null,
+        fbSenderId: String(userId),
       });
     } catch (error) {
       console.error("Order save failed:", error.message);
       const reply =
         "Sorry, we couldn't save your order just now. Our team will reach out to you shortly.";
       remember(userId, raw, reply);
-      return reply;
+      return { text: reply };
     }
 
-    const reply = orderSuccessReply(order, savedOrder.order_number);
+    const baseReply = orderSuccessReply(order, savedOrder.order_number);
     memory.delete(userId); // fresh start after a confirmed order
-    return reply;
+
+    // Online payment -> generate an eSewa QR the customer can scan to pay
+    if (order.payment === "Online") {
+      try {
+        const { imageUrl, amount } = await createOrderQr(savedOrder.order_number);
+        return {
+          text: `${baseReply}\n\nScan the QR below to pay ${SHOP.currency} ${amount} and complete your order.`,
+          imageUrl,
+        };
+      } catch (error) {
+        console.warn("Could not create payment QR:", error.message);
+        return {
+          text: `${baseReply}\n\nOur team will share the payment link with you shortly.`,
+        };
+      }
+    }
+
+    return { text: baseReply };
   }
 
+  const trackingIntent =
+  /\b(track|tracking|order status|status of my order|where is my order)\b/i.test(raw);
+
+const orderNumberMatch = raw.match(/\b\d{6}\b/);
+
+if (trackingIntent || orderNumberMatch) {
+  if (!orderNumberMatch) {
+    return { text: "Please send your 6-digit order number to track your order." };
+  }
+
+  try {
+    const order = await getOrderDetails(orderNumberMatch[0]);
+
+    const statusMessages = {
+      pending: "Your order is awaiting confirmation.",
+      confirmed: "Your order has been confirmed.",
+      processing: "Your order is being prepared.",
+      shipped: "Your order has been shipped.",
+      delivered: "Your order has been delivered.",
+      cancelled: "Your order has been cancelled.",
+    };
+
+    const status = String(order.status || "pending").toLowerCase();
+    const statusMessage =
+      statusMessages[status] || `Current status: ${order.status}`;
+
+    return {
+      text: `📦 Order Tracking
+
+Order Number: ${order.orderNumber}
+Item: ${order.item}
+Quantity: ${order.quantity}
+Total: Rs. ${order.amount}
+
+Status: ${statusMessage}
+Payment Method: ${order.paymentMethod}
+Payment Status: ${order.paymentStatus || "Not available"}`,
+    };
+  } catch (error) {
+    if (error.status === 404) {
+      return {
+        text: "Sorry, I couldn't find an order with that number. Please check your order number and try again.",
+      };
+    }
+
+    console.error("Order tracking error:", error);
+    return {
+      text: "Sorry, I couldn't retrieve your order status right now. Please try again later.",
+    };
+  }
+}
   // Customer wants to order -> send the form immediately
   if (ORDER_INTENT.test(raw)) {
     remember(userId, raw, ORDER_FORM);
-    return ORDER_FORM;
+    return { text: ORDER_FORM };
   }
 
   // Everything else -> ask the model
@@ -499,12 +569,12 @@ export async function getReply(
 
     const reply = (await response.json()).message.content.trim();
     if (!reply || reply.includes("```") || reply.length > 600)
-      return TEAM_FALLBACK;
+      return { text: TEAM_FALLBACK };
 
     remember(userId, raw, reply);
-    return reply;
+    return { text: reply };
   } catch (error) {
     console.error("AI error:", error.message);
-    return TEAM_FALLBACK;
+    return { text: TEAM_FALLBACK };
   }
 }

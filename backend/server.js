@@ -16,6 +16,7 @@ import instaScheduledPostRoutes from "./routes/instaScheduledPostRoutes.js";
 import fbMessengerRoutes from "./routes/fbMessengerRoutes.js";
 import webhookRoutes from "./routes/webhookRoutes.js"; // NEW
 import orderRoutes from "./routes/orderRoutes.js";
+import esewaRoutes from "./routes/esewaRoutes.js";
 
 dotenv.config();
 
@@ -34,7 +35,7 @@ app.use(express.json());
 app.use(
   session({
     name: "socially.sid",
-    secret: process.env.SESSION_SECRET || "dev-secret-change-me",
+    secret: process.env.SESSION_SECRET || "secrrete_key",
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -48,6 +49,7 @@ app.use(
 
 // Routes
 app.use("/uploads", express.static(path.resolve("uploads")));
+app.use("/qr", express.static(path.resolve("public/qr")));
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
@@ -64,7 +66,7 @@ app.use("/api/instagram", instaScheduledPostRoutes);
 app.use("/api/messenger", fbMessengerRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/auth", fbRoutes);
-
+app.use("/api/esewa", esewaRoutes)
 // Unknown API route
 app.use("/api", (req, res) => {
   res.status(404).json({ message: "Route not found" });

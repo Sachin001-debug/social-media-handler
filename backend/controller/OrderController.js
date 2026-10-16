@@ -121,3 +121,34 @@ export const updateOrderStatusController = async (req, res) => {
     });
   }
 };
+
+
+//for tracking
+export const getOrderDetailsController = async (req, res) => {
+  try {
+    const { orderNumber } = req.params;
+
+    if (!orderNumber) {
+      return res.status(400).json({
+        success: false,
+        message: "Order number is required",
+      });
+    }
+
+    const order = await getOrderDetails(orderNumber);
+
+    return res.status(200).json({
+      success: true,
+      order,
+    });
+  } catch (err) {
+    console.error("Error tracking order:", err.message);
+
+    return res.status(err.status || 500).json({
+      success: false,
+      message: err.status
+        ? err.message
+        : "Failed to retrieve order details",
+    });
+  }
+};

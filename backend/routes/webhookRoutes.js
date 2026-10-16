@@ -1,6 +1,6 @@
 import express from "express";
 import { getReply, alreadySeen } from "../ai/ai.js";
-import { sendAsPage } from "../ai/bot.js";
+import { sendAsPage, sendImageAsPage } from "../ai/bot.js";
 import { findFbAccountByFbUserId } from "../services/fbAccountService.js";
 import { getMessengerUserProfile } from "../services/fbServices.js";
 
@@ -39,8 +39,16 @@ const handleIncomingMessage = async ({ senderId, pageId, text, mid }) => {
     loadFacebookProfile: () =>
       getMessengerUserProfile(senderId, account.accessToken),
   });
-  console.log(`Webhook: AI reply -> ${JSON.stringify(reply)}`);
-  await sendAsPage(account.fbUserId, account.accessToken, senderId, reply);
+  const message = typeof reply === "string" ? { text: reply } : reply || {};
+  const { text: replyText, imageUrl } = message;
+  console.log(`Webhook: AI reply -> ${JSON.stringify(message)}`);
+
+  if (replyText) {
+    await sendAsPage(account.fbUserId, account.accessToken, senderId, replyText);
+  }
+  if (imageUrl) {
+    await sendImageAsPage(account.fbUserId, account.accessToken, senderId, imageUrl);
+  }
 };
 
 // Incoming messages auto-reply using the local Ollama assistant

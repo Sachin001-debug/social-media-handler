@@ -31,6 +31,11 @@ export default (sequelize) => {
         type: DataTypes.STRING(500),
         allowNull: true,
       },
+      fb_sender_id: {
+        type: DataTypes.STRING(64),
+        allowNull: true,
+        field: "fb_sender_id",
+      },
       item: {
         type: DataTypes.STRING(255),
         allowNull: false,

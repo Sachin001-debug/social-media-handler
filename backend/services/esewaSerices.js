@@ -4,6 +4,7 @@ import path from "path";
 import QRCode from "qrcode";
 import db from "../models/index.js";
 import { markOrderPaid, getOrderPriceById } from "./OrderServices.js";
+import { sendAsPage } from "../ai/bot.js";
 
 //getting the con first
 
@@ -60,8 +61,8 @@ export const buildPaymentFields = (orderNumber, amount) => {
         product_code: config.productCode,
         product_service_charge: "0",
         product_delivery_charge: "0",
-        success_url: `${config.publicUrl}/esewa/success`,
-        failure_url: `${config.publicUrl}/esewa/failure`,
+        success_url: `${config.publicUrl}/api/esewa/success`,
+        failure_url: `${config.publicUrl}/api/esewa/failure`,
         signed_field_names: "total_amount,transaction_uuid,product_code",
         signature: makeSignature(total, transactionUuid),
       },
@@ -127,6 +128,27 @@ export const decodeCallback = (dataParam) => {
 
 export const orderNumberFromUuid = (uuid) => String(uuid).split("-")[0];
 
+// Tell the customer on Messenger that their eSewa payment came through
+export const notifyPaymentConfirmed = async (order) => {
+  if (!order?.fb_sender_id || !order?.fbAccountId) return;
+
+  try {
+    const page = await db.FbAccount.findByPk(order.fbAccountId, {
+      attributes: ["fbUserId", "accessToken"],
+    });
+    if (!page?.accessToken) return;
+
+    const text = [
+      `Payment confirmed! We received Rs. ${Number(order.total)} for order #${order.order_number}.`,
+      `Your order is being prepared. Thanks for shopping with us!`,
+    ].join("\n");
+
+    await sendAsPage(page.fbUserId, page.accessToken, order.fb_sender_id, text);
+  } catch (error) {
+    console.warn("Could not send payment confirmation message:", error.message);
+  }
+};
+
 //verfiy the message from the esewa
 export const verifyAndConfirm = async (dataParam) => {
   const config = getEsewaConfig();
@@ -168,6 +190,10 @@ export const verifyAndConfirm = async (dataParam) => {
 
   // Mark paid
   const paidOrder = await markOrderPaid(orderNumber);
+
+  // Let the customer know on Messenger that the payment went through
+  await notifyPaymentConfirmed(paidOrder);
+
   return { order: paidOrder, alreadyPaid: false, refId: result.ref_id };
 };
 
@@ -185,7 +211,7 @@ export const createOrderQr = async (orderNumber) => {
   const fileName = `${orderNumber}-${Date.now()}.png`;
   await QRCode.toFile(
     path.join(folder, fileName),
-    `${config.publicUrl}/pay/${orderNumber}`,
+    `${config.publicUrl}/api/esewa/pay/${orderNumber}`,
     { width: 500, margin: 2 },
   );
 

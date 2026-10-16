@@ -90,13 +90,15 @@ export const messengerApi = {
 };
 
 export const ordersApi = {
-  list: (accountId) =>
-    request(`/api/orders?accountId=${encodeURIComponent(accountId)}`),
+  list: (accountId) => request(`/api/orders?accountId=${encodeURIComponent(accountId)}`),
+
   updateStatus: (orderId, status) =>
     request(`/api/orders/${encodeURIComponent(orderId)}/status`, {
       method: "PATCH",
       body: { status },
     }),
+
+    trackorder: (orderNumber)=> request(`/api/orders/track/${encodeURIComponent(orderNumber)}`)
 };
 
 //insta api

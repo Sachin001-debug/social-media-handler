@@ -3,6 +3,7 @@ import db from "../models/index.js";
 import Orders from "../models/Orders.js";
 import { where } from "sequelize";
 
+
 export const PRODUCTS = [
   { code: "P102", name: "Blue Shirt", price: 500, stock: "in stock" },
   { code: "P103", name: "Black Jeans", price: 800, stock: "in stock" },
@@ -25,6 +26,7 @@ export const saveOrder = async ({
   fbAccountId,
   fbUsername,
   fbImage,
+  fbSenderId,
 }) => {
   const productText = typeof item === "string" ? item.trim() : "";
   const customerName = typeof clientName === "string" ? clientName.trim() : "";
@@ -110,6 +112,7 @@ export const saveOrder = async ({
     fbAccountId: pageAccount.id,
     fb_username: String(fbUsername || customerName).trim(),
     fb_image: fbImage || null,
+    fb_sender_id: fbSenderId ? String(fbSenderId) : null,
     quantity,
     total,
     phone: customerPhone,
@@ -151,7 +154,7 @@ export const listOrdersForFacebookAccount = async (userId, accountId) => {
 };
 
 
-const ORDER_STATUSES = [
+export const ORDER_STATUSES = [
   "pending",
   "confirmed",
   "processing",
@@ -159,16 +162,6 @@ const ORDER_STATUSES = [
   "delivered",
   "cancelled",
 ];
-
-// which status can move to which
-const ALLOWED_TRANSITIONS = {
-  pending: ["confirmed", "cancelled"],
-  confirmed: ["processing", "cancelled"],
-  processing: ["shipped", "cancelled"],
-  shipped: ["delivered"],
-  delivered: [],
-  cancelled: [],
-};
 
 export const updateOrderStatus = async (userId, orderId, newStatus) => {
   const id = Number(orderId);
@@ -205,12 +198,6 @@ export const updateOrderStatus = async (userId, orderId, newStatus) => {
   }
 
   if (order.status === status) return order; // nothing to change
-
-  if (!ALLOWED_TRANSITIONS[order.status].includes(status)) {
-    const error = new Error(`Cannot change order from ${order.status} to ${status}`);
-    error.status = 400;
-    throw error;
-  }
 
   order.status = status;
 
@@ -291,4 +278,44 @@ export const markOrderPaid = async (orderNumber) => {
 
   await order.save();
   return order;
+};
+
+//TRACKING THE OREDR WITH ORDER NUMBER 
+// Track an order by order number
+export const getOrderDetails = async (orderNumber) => {
+  const number = String(orderNumber ?? "").trim();
+
+  if (!number) {
+    const error = new Error("Order number is required");
+    error.status = 400;
+    throw error;
+  }
+
+  const order = await db.Order.findOne({
+    where: { order_number: number },
+    attributes: ["id","order_number", "item",
+      "quantity","total", "status",
+      "payment_method",
+      "payment_status",
+      "createdAt",
+    ],
+  });
+
+  if (!order) {
+    const error = new Error("Order not found");
+    error.status = 404;
+    throw error;
+  }
+
+  return {
+    orderId: order.id,
+    orderNumber: order.order_number,
+    item: order.item,
+    quantity: order.quantity,
+    amount: Number(order.total),
+    status: order.status,
+    paymentMethod: order.payment_method,
+    paymentStatus: order.payment_status,
+    createdAt: order.createdAt,
+  };
 };
